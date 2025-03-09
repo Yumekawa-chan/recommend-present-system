@@ -6,9 +6,8 @@ import GiftForm, { FormData } from '@/app/components/GiftForm';
 import ResultSection from '@/app/components/ResultSection';
 import Footer from '@/app/components/Footer';
 
-// レート制限の設定
-const COOLDOWN_PERIOD = 120; // 秒単位での制限時間 (2分)
-const MAX_REQUESTS_PER_SESSION = 10; // セッションあたりの最大リクエスト数
+const COOLDOWN_PERIOD = 120;
+const MAX_REQUESTS_PER_SESSION = 10;
 
 const RecommendGiftPage = () => {
   const [results, setResults] = useState<string[]>([]);
@@ -17,7 +16,6 @@ const RecommendGiftPage = () => {
   const [requestCount, setRequestCount] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
-  // クールダウンタイマー（非表示だがバックグラウンドで動作）
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (cooldown > 0) {
@@ -28,66 +26,82 @@ const RecommendGiftPage = () => {
     return () => clearTimeout(timer);
   }, [cooldown]);
 
-  // セッションストレージからリクエスト数を取得
   useEffect(() => {
     const storedCount = sessionStorage.getItem('requestCount');
     if (storedCount) {
       setRequestCount(parseInt(storedCount, 10));
     }
+    
+    const storedCooldown = sessionStorage.getItem('cooldownUntil');
+    if (storedCooldown) {
+      const cooldownUntil = parseInt(storedCooldown, 10);
+      const now = Math.floor(Date.now() / 1000);
+      const remainingCooldown = Math.max(0, cooldownUntil - now);
+      
+      if (remainingCooldown > 0) {
+        setCooldown(remainingCooldown);
+      }
+    }
   }, []);
 
-  // リクエスト数を更新
   const updateRequestCount = (count: number) => {
     setRequestCount(count);
     sessionStorage.setItem('requestCount', count.toString());
   };
 
-  const handleFormSubmit = (data: FormData) => {
-    // 入力値のサニタイズ（XSS対策など）
+  const updateCooldown = (seconds: number) => {
+    setCooldown(seconds);
+    const now = Math.floor(Date.now() / 1000);
+    const cooldownUntil = now + seconds;
+    sessionStorage.setItem('cooldownUntil', cooldownUntil.toString());
+  };
+
+  const handleFormSubmit = async (data: FormData) => {
     const sanitizedData = {
       ...data,
       occasion: data.occasion.slice(0, 50),
       hobbies: data.hobbies?.slice(0, 100) || '',
     };
 
-    // エラーをリセット
     setError(null);
 
-    // レート制限チェック
     if (cooldown > 0) {
       setError(`しばらく経ってから再度お試しください。`);
       return;
     }
 
-    // セッションあたりの最大リクエスト数チェック
     if (requestCount >= MAX_REQUESTS_PER_SESSION) {
       setError(`リクエスト数の上限に達しました。再度お試しになるには、ブラウザを再起動してください。`);
       return;
     }
 
-    // ローディング状態をオンにする
     setIsLoading(true);
-    
-    // クールダウン開始
-    setCooldown(COOLDOWN_PERIOD);
-    
-    // リクエスト数を増やす
+    updateCooldown(COOLDOWN_PERIOD);
     updateRequestCount(requestCount + 1);
     
-    // APIリクエストを模擬するために遅延を設定
-    setTimeout(() => {
-      // ここではデモ用にダミーデータを使用
-      // 実際のアプリケーションではChatGPT APIなどを使用
-      const dummyResults = [
-        `${sanitizedData.gender}の${sanitizedData.age}歳の方へ、${sanitizedData.occasion}に最適な${sanitizedData.hobbies}を楽しめるアイテム`,
-        `${sanitizedData.budget}円以内で購入できるおすすめギフト。${sanitizedData.relation}関係に適しています。`,
-        `${sanitizedData.purpose}に合わせて選定した特別なギフト提案です。`
-      ];
-      setResults(dummyResults);
+    try {
+      const response = await fetch('/api/gift-suggestions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(sanitizedData),
+      });
       
-      // ローディング状態をオフにする
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || '提案の取得中にエラーが発生しました');
+      }
+      
+      const data = await response.json();
+      setResults(data.suggestions);
+      
+    } catch (err) {
+      console.error('API呼び出しエラー:', err);
+      setError(err instanceof Error ? err.message : '提案の取得中にエラーが発生しました');
+    } finally {
       setIsLoading(false);
-    }, 2000); // 2秒の遅延を設定
+    }
   };
 
   return (

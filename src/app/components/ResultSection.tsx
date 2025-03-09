@@ -15,11 +15,14 @@ const ResultSection: React.FC<ResultSectionProps> = ({ results, isLoading = fals
       </h2>
       
       {isLoading ? (
-        <div className="bg-white rounded border border-gray-200 p-10 text-center">
+        <div className="bg-white rounded-xl shadow-lg p-10 text-center">
           <div className="flex flex-col items-center justify-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500 mb-4"></div>
-            <p className="text-gray-600">提案を生成中です...</p>
-            <p className="text-gray-500 text-sm mt-3">しばらくお待ちください</p>
+            <div className="relative w-20 h-20">
+              <div className="absolute top-0 left-0 w-full h-full rounded-full border-t-4 border-b-4 border-blue-500 animate-spin"></div>
+              <div className="absolute top-1 left-1 w-[90%] h-[90%] rounded-full border-r-4 border-l-4 border-pink-400 animate-spin-slow"></div>
+            </div>
+            <p className="text-gray-700 font-semibold mt-6">素敵な提案を生成中</p>
+            <p className="text-gray-500 text-sm mt-2">しばらくお待ちください</p>
           </div>
         </div>
       ) : results && results.length > 0 ? (
@@ -27,28 +30,34 @@ const ResultSection: React.FC<ResultSectionProps> = ({ results, isLoading = fals
           {results.map((result, index) => (
             <div 
               key={index} 
-              className="bg-white rounded border border-gray-200 hover:shadow-lg transition-shadow duration-300"
+              className="group bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden transform hover:-translate-y-2 border border-transparent hover:border-indigo-100"
             >
-              <div className="p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="bg-gray-100 text-gray-700 text-xs font-medium px-2.5 py-0.5 rounded">提案 {index + 1}</span>
-                  <svg className="w-5 h-5 text-gray-400 hover:text-gray-600 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"></path>
+              <div className="h-1.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
+              <div className="p-8">
+                <div className="w-14 h-14 mb-5 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-full flex items-center justify-center mx-auto">
+                  <svg className="w-7 h-7 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path>
                   </svg>
                 </div>
-                <p className="text-gray-700 leading-relaxed">{result}</p>
+                <p className="text-gray-700 font-medium text-lg text-center leading-relaxed">
+                  {result}
+                </p>
+               
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <div className="bg-white rounded border border-gray-200 p-8 text-center">
-          <svg className="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16l2.879-2.879m0 0a3 3 0 104.243-4.242 3 3 0 00-4.243 4.242zM21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-          <p className="text-gray-600">
+        <div className="bg-white rounded-xl shadow-lg p-10 text-center">
+          <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg className="w-12 h-12 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+          </div>
+          <h3 className="text-xl font-semibold text-gray-800 mb-2">まだ提案がありません</h3>
+          <p className="text-gray-600 max-w-md mx-auto">
             フォームに情報を入力して「提案を取得」ボタンをクリックすると、
-            <br />最適なギフトの提案が表示されます。
+            あなたにぴったりのギフト提案が表示されます。
           </p>
         </div>
       )}
