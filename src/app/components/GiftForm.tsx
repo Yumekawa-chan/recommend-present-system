@@ -36,11 +36,15 @@ const GiftForm: React.FC<GiftFormProps> = ({ onSubmit }) => {
             <label className="block text-gray-700 text-sm font-medium mb-2">相手の年齢</label>
             <input
               type="number"
-              {...register("age", { required: true })}
+              {...register("age", { 
+                required: true,
+                min: { value: 0, message: "0以上の値を入力してください" },
+                max: { value: 120, message: "120以下の値を入力してください" }
+              })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="例: 25"
             />
-            {errors.age && <span className="text-red-500 text-xs mt-1 block">年齢を入力してください</span>}
+            {errors.age && <span className="text-red-500 text-xs mt-1 block">{errors.age.message || "年齢を入力してください"}</span>}
           </div>
 
           <div className="form-group">
@@ -63,23 +67,31 @@ const GiftForm: React.FC<GiftFormProps> = ({ onSubmit }) => {
               <span className="absolute left-3 top-2 text-gray-500">¥</span>
               <input
                 type="number"
-                {...register("budget", { required: true })}
+                {...register("budget", { 
+                  required: true,
+                  min: { value: 0, message: "0以上の値を入力してください" },
+                  max: { value: 1000000, message: "100万円以下の値を入力してください" }
+                })}
                 className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="例: 5000"
               />
             </div>
-            {errors.budget && <span className="text-red-500 text-xs mt-1 block">予算を入力してください</span>}
+            {errors.budget && <span className="text-red-500 text-xs mt-1 block">{errors.budget.message || "予算を入力してください"}</span>}
           </div>
 
           <div className="form-group">
             <label className="block text-gray-700 text-sm font-medium mb-2">状況</label>
             <input
               type="text"
-              {...register("occasion", { required: true })}
+              {...register("occasion", { 
+                required: true,
+                maxLength: { value: 50, message: "50文字以内で入力してください" }
+              })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="例: 誕生日、記念日"
+              maxLength={50}
             />
-            {errors.occasion && <span className="text-red-500 text-xs mt-1 block">状況を入力してください</span>}
+            {errors.occasion && <span className="text-red-500 text-xs mt-1 block">{errors.occasion.message || "状況を入力してください"}</span>}
           </div>
 
           <div className="form-group">
@@ -97,13 +109,20 @@ const GiftForm: React.FC<GiftFormProps> = ({ onSubmit }) => {
           </div>
 
           <div className="form-group">
-            <label className="block text-gray-700 text-sm font-medium mb-2">趣味や好きなもの</label>
+            <label className="flex justify-between text-gray-700 text-sm font-medium mb-2">
+              <span>趣味や好きなもの</span>
+              <span className="text-gray-500 text-xs">最大100文字</span>
+            </label>
             <input
               type="text"
-              {...register("hobbies")}
+              {...register("hobbies", { 
+                maxLength: { value: 100, message: "100文字以内で入力してください" }
+              })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="例: 読書、旅行、料理"
+              maxLength={100}
             />
+            {errors.hobbies && <span className="text-red-500 text-xs mt-1 block">{errors.hobbies.message}</span>}
           </div>
 
           <div className="form-group md:col-span-2">
